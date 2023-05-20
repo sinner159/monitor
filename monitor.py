@@ -33,9 +33,9 @@ class Monitor():
 
     def main(self):
         
-        for host in self.host_vms:
-            host.capture = pyshark.LiveCapture(host.interface)
-            self.threads.append(Thread(target=host.monitor))
+        # for host in self.host_vms:
+        #     host.capture = pyshark.LiveCapture(host.interface)
+        #     self.threads.append(Thread(target=host.monitor))
 
         for client in self.clients:
             client.capture = pyshark.LiveCapture(client.interface)
@@ -44,6 +44,14 @@ class Monitor():
 
         for thread in self.threads:
             thread.start()
+
+        while True:
+            #for host in self.host_vms:
+
+            for client in self.clients:
+                if client.is_suspicious:
+                    print(f"client: {client.name} is suspicious!!")
+                   
 
 
      
