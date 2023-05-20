@@ -1,11 +1,10 @@
-import requests
 from host import Host,Client,PacketWrapper,TCPFLAG
 from threading import Thread
 import json
 import time
 from scapy.all import sniff
 from scapy.fields import FlagsField
-
+import requests
 
 
 class Monitor():
@@ -19,8 +18,6 @@ class Monitor():
         self.host_ips = [h.ip for h in self.host_vms]
 
 
-    def create_filter_string():
-        
     def read_mapping(self,filename):
         file = open(filename,"r")
         obj = json.load(file)
@@ -39,7 +36,7 @@ class Monitor():
             self.clients.append(Client(ip, interface, mac, name))
 
     def monitor(self):
-        sniff(prn=self.process_pkt, iface=[h.interface for h in self.host_vms], filter=f"tcp and ip and (src host 10.10.1.5 or src host )", store=0)
+        sniff(prn=self.process_pkt, iface=[h.interface for h in self.host_vms], filter=f"tcp and ip", store=0)
         a=0
 
     def main(self):
@@ -55,6 +52,8 @@ class Monitor():
                     conn_count = len(tcp_conns.keys())
                     if  conn_count > 50:
                         print(f"client: {client.ip} has {conn_count} connections with host {host_ip} !!!")
+                        requests.get(f"http://192.86.139.96:8080/falsereality/{client_ip}")
+
                 if client.is_suspicious:
                     print(f"client: {client.name} is suspicious!!")
                 time.sleep(0)
@@ -75,15 +74,16 @@ class Monitor():
             if host_ip not in client.connections:
                 client.connections[host_ip] = {}
             ports_open_from_client = client.connections[host_ip]
-            if pw.tcp_src not in ports_open_from_client:
-                ports_open_from_client[pw.tcp_src] = False
+            if client_tcp not in ports_open_from_client:
+                ports_open_from_client[client_tcp] = False
             else:
                 
                 if pw.tcp_flags == TCPFLAG.SYN.value:
                     print("second SYN on port already in use!!!!")
                 if pw.tcp_flags == TCPFLAG.ACK.value:
-                    ports_open_from_client[pw.tcp_src] = True
-                    ports_open_from_client.pop(pw.tcp_src)
+                    ports_open_from_client[client_tcp] = True
+                if pw.tcp_flags == TCPFLAG.FINACK.value or pw.tcp_flags == TCPFLAG.FIN.value: 
+                    ports_open_from_client.pop(client_tcp)
         else:
             host_ip = pw.ip_src
             host_tcp = pw.tcp_src
@@ -93,7 +93,8 @@ class Monitor():
             if pw.tcp_flags == TCPFLAG.FINACK.value and client_ip in self.clients_connected:
                 client = self.clients_connected[client_ip]
                 ports_open_from_client = client.connections[host_ip]
-                ports_open_from_client.pop(client_tcp)
+                if client_tcp in ports_open_from_client:
+                    ports_open_from_client.pop(client_tcp)
 
                 
 
