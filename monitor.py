@@ -3,7 +3,10 @@ import requests
 from host import Host,Client
 from threading import Thread
 import json
+import time
 
+def process_pkt(pkt):
+    print(pkt)
 
 class Monitor():
     def __init__(self):
@@ -19,7 +22,7 @@ class Monitor():
         obj = json.load(file)
         for h in obj['hosts']:
             ip = h['ip']
-            interface = h['interface']
+            interface= h['interface']
             mac = h['mac']
             name = h['name']
             self.host_vms.append(Host(ip, interface ,mac, name))
@@ -33,24 +36,32 @@ class Monitor():
 
     def main(self):
         
+        #cap = pyshark.LiveCapture("eth1")
+        cap = pyshark.RemoteCapture("10.10.1.1","eth1")
+        
         # for host in self.host_vms:
-        #     host.capture = pyshark.LiveCapture(host.interface)
-        #     self.threads.append(Thread(target=host.monitor))
+        #     cap.interfaces.append(host.interface)
+            # host.capture = pyshark.LiveCapture(host.interface)
+            # self.threads.append(Thread(target=host.monitor))
 
-        for client in self.clients:
-            client.capture = pyshark.LiveCapture(client.interface)
-            self.threads.append(Thread(target=client.monitor))
+        # for client in self.clients:
+        #     cap.interfaces.append(client.interface)
+            # client.capture = pyshark.LiveCapture(client.interface)
+            # self.threads.append(Thread(target=client.monitor))
             
 
-        for thread in self.threads:
-            thread.start()
+        # for thread in self.threads:
+        #     thread.start()
 
         while True:
             #for host in self.host_vms:
+            #cap.sniff(timeout=5)
+            cap.apply_on_packets(process_pkt)
 
             for client in self.clients:
                 if client.is_suspicious:
                     print(f"client: {client.name} is suspicious!!")
+                time.sleep(0)
                    
 
 
