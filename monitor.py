@@ -22,24 +22,24 @@ class Monitor():
             interface = h['interface']
             mac = h['mac']
             name = h['name']
-            self.host_vms.append(Host(ip,interface,mac,name))
+            self.host_vms.append(Host(ip, interface ,mac, name))
 
         for c in obj['clients']:
             ip = c['ip']
             interface = c['interface']
             mac = c['mac']
             name = c['name']
-            self.clients.append(Client(ip,interface,mac,name))
+            self.clients.append(Client(ip, interface, mac, name))
 
     def main(self):
         
-        for i , host in self.host_vms.items():
+        for host in self.host_vms:
             host.capture = pyshark.LiveCapture(host.interface)
-            self.threads.append(Thread(target=host.monitor()))
+            self.threads.append(Thread(target=host.monitor))
 
-        for i , client in self.clients.items():
+        for client in self.clients:
             client.capture = pyshark.LiveCapture(client.interface)
-            self.threads.append(Thread(target=client.monitor()))
+            self.threads.append(Thread(target=client.monitor))
             
 
         for thread in self.threads:
