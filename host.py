@@ -6,6 +6,13 @@ class Machine():
         self.mac = mac
         self.name = name
         self.capture = capture
+
+    def monitor(self):
+        print(f"monitor started for {self.name} {self.ip} {self.interface}")
+        while True:
+            self.capture.sniff(timeout=5)
+            for packet in capture:
+                print(packet)
         
 class Client(Machine):
 

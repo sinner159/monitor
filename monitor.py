@@ -8,9 +8,10 @@ import json
 class Monitor():
     def __init__(self):
         self.suspicious_hosts = {}
+        self.threads = []
         self.host_vms = []
         self.clients = []
-        self.read_mapping()
+        self.read_mapping("mapping.json")
 
 
     def read_mapping(self,filename):
@@ -30,21 +31,21 @@ class Monitor():
             name = c['name']
             self.clients.append(Client(ip,interface,mac,name))
 
+    def main(self):
+        
+        for i , host in self.host_vms.items():
+            host.capture = pyshark.LiveCapture(host.interface)
+            self.threads.append(Thread(target=host.monitor()))
 
-for i , host in host_vms.items():
-    host.capture = pyshark.LiveCapture(host.interface)
-    host_vms.append
+        for i , client in self.clients.items():
+            client.capture = pyshark.LiveCapture(client.interface)
+            self.threads.append(Thread(target=client.monitor()))
+            
 
-for i , client in clients.items():
-    client.capture = pyshark.LiveCapture(client.interface)
-    
+        for thread in self.threads:
+            thread.start()
 
-while True:
-
-    for index, capture in captures.items():
-        capture.sniff(timeout=5)
-
-        for packet in capture:
-            print(packet)
 
      
+monitor = Monitor()
+monitor.main()
