@@ -107,8 +107,11 @@ class ClientHostConnection():
              if tcpH.most_recent_client_pkt == TCPFLAG.FIN.value or \
                 tcpH.most_recent_client_pkt == TCPFLAG.FINACK.value or \
                 tcpH.most_recent_host_pkt == TCPFLAG.FIN.value or \
-                tcpH.most_recent_host_pkt == TCPFLAG.FINACK.value:
-                
+                tcpH.most_recent_host_pkt == TCPFLAG.FINACK.value or \
+                tcpH.most_recent_client_pkt == TCPFLAG.RST.value or \
+                tcpH.most_recent_client_pkt == TCPFLAG.RSTACK.value or \
+                tcpH.most_recent_host_pkt == TCPFLAG.RST.value or \
+                tcpH.most_recent_host_pkt == TCPFLAG.RSTACK.value:
                 # (curr_time -(tcpH.client_time if tcpH.client_time is not None else curr_time)) > 2000 or \
                 # (curr_time - (tcpH.host_time if tcpH.host_time is not None else curr_time)) > 2000:
                  ports_to_remove.append(port)
@@ -161,3 +164,4 @@ class TCPFLAG(Enum):
     RST = 4
     PUSHACK = 24
     FINACK = 17
+    RSTACK = 20 
