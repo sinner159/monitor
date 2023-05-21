@@ -38,7 +38,7 @@ class Monitor():
 
     def monitor(self):
         #[h.interface for h in self.host_vms]
-        sniff(prn=self.process_pkt, iface="eth4", filter=f"tcp and ip", store=0)
+        sniff(prn=self.process_pkt, iface=[h.interface for h in self.host_vms], filter=f"tcp and ip", store=0)
         a=0
 
     def main(self):

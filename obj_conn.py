@@ -111,9 +111,9 @@ class ClientHostConnection():
                 tcpH.most_recent_client_pkt == TCPFLAG.RST.value or \
                 tcpH.most_recent_client_pkt == TCPFLAG.RSTACK.value or \
                 tcpH.most_recent_host_pkt == TCPFLAG.RST.value or \
-                tcpH.most_recent_host_pkt == TCPFLAG.RSTACK.value:
-                # (curr_time -(tcpH.client_time if tcpH.client_time is not None else curr_time)) > 2000 or \
-                # (curr_time - (tcpH.host_time if tcpH.host_time is not None else curr_time)) > 2000:
+                tcpH.most_recent_host_pkt == TCPFLAG.RSTACK.value or \
+                (curr_time -(tcpH.client_time if tcpH.client_time is not None else curr_time)) > 2 or \
+                (curr_time - (tcpH.host_time if tcpH.host_time is not None else curr_time)) > 2:
                  ports_to_remove.append(port)
         
         for port in ports_to_remove:
