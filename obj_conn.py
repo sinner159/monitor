@@ -12,49 +12,56 @@ class Machine():
         self.mac = mac
         self.name = name
         
-
-    # def process_pkt(self,pkt):
-    #     print(pkt)
-
-    # def monitor(self):
-    #     print(f"monitor started for {self.name} {self.ip} {self.interface}")
-    #     sniff(prn=self.process_pkt, iface=self.interface, filter=f"tcp and ip", store=0)
-
-
-
 class Client(Machine):
 
-    def __init__(self, ip, mac, name, is_suspicious=False, is_attacker=False):
-        super().__init__(ip,None, mac, name)
+    def __init__(self, ip, name, is_suspicious=False, is_attacker=False):
+        super().__init__(ip,None, None, name)
         self.is_suspicious = is_suspicious
         self.is_attacker = is_attacker
-        self.connections = {}
+        self.host_connections = {}
         self.packets_sent = 0
         self.ports_connected_from = set()
         self.avg_pkt_count = 0 # totalPacketCount/numberofhosts
         self.avg_num_connections = 0
         self.partial_requests_sent = 0
 
+class TCPHandshake():
+    #shows the stages of the handshake, used to determine if a client has partial connections open
 
-        
+    def __init__(self):
+        self.most_recent_client_pkt = None
+        self.most_recent_host_pkt = None
+
+class ClientHostConnection():
+    #Represents the tcp ports open on the client machine that are connecting to the host machine
+    #In this case it's just connecting to port 80 of the host machine
+    def __init__(self):
+        self.tcp_ports = {}
+
+    def tcp_conn_open(self, client_port):
+        return client_port in self.tcp_ports
+    
+    def update_tcp_conn(self, port, is_client_side, tcp_flags):
+
+        if not self.tcp_conn_open(port):
+            self.tcp_ports[port] = TCPHandshake()
+    
+        if is_client_side :
+            self.tcp_ports[port].most_recent_client_pkt = tcp_flags
+        else:
+            self.tcp_ports[port].most_recent_host_pkt = tcp_flags
+
+    def get_partially_open_ports(self):
+        for port in self.tcp_ports:
+            if port.most_recent_client_pkt == TCPFLAG.SYN and 
+
+
 
 class Host(Machine):
     
     def __init__(self, ip, interface, mac,name, is_target=False):
         super().__init__(ip, interface, mac, name)
         self.is_target = is_target
-        
-
-    # def process_pkt(self,pkt: Packet):
-        
-    #     pw = PacketWrapper(pkt)
-    #     if pw.ip_src not in self.clients_connected:
-    #         self.clients_connected[pw.ip_src] = Client(pw.ip_src,"",pw.mac_src,"")
-        
-    #     print("Host process_pkt Called")
-        
-
-
 
 class PacketWrapper():
 
@@ -79,7 +86,7 @@ class PacketWrapper():
         if self.tcp_flags == TCPFLAG.SYNACK.value:
             return "SYNACK"
         if self.tcp_flags == TCPFLAG.ACK.value:
-            return "SYNACK"
+            return "ACK"
         if self.tcp_flags == TCPFLAG.SYN.value:
             return "SYN"
         if self.tcp_flags == TCPFLAG.FIN.value:
