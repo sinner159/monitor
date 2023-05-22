@@ -1,4 +1,4 @@
-from obj_conn import Host,Client,PacketWrapper,TCPFLAG,ClientHostConnection, TCPHandshake
+from obj_conn import Host,Client,PacketWrapper,TCPFLAG,ClientHostConnection, TCPHandshake, Machine
 from threading import Thread, Lock
 import json
 import time
@@ -34,12 +34,12 @@ class Monitor():
             interface = c['interface']
             mac = c['mac']
             name = c['name']
-            self.clients.append(Client(ip, interface, mac, name))
+            self.clients.append(Client(ip, mac, name, interface))
+
 
     def monitor(self):
         #[h.interface for h in self.host_vms]
-        sniff(prn=self.process_pkt, iface=[h.interface for h in self.host_vms], filter=f"tcp and ip", store=0)
-        a=0
+        sniff(prn=self.process_pkt, iface=[h.interface for h in self.clients], filter=f"tcp and ip", store=0)
 
     def main(self):
         
@@ -63,7 +63,7 @@ class Monitor():
                    
     def process_pkt(self,pkt):
         pw = PacketWrapper(pkt)
-        #print(pw)
+        print(pw)
         
         if pw.ip_src not in self.host_ips:
            self.handle_client_packet(pw.ip_dst, pw.ip_src, pw.tcp_src, pw.tcp_flags,pw.time_created,pw.mac_src)
@@ -74,7 +74,7 @@ class Monitor():
         with self.lock:
         
             if client_ip not in self.clients_connected:
-                    self.clients_connected[client_ip] = Client(client_ip,client_mac,None)
+                    self.clients_connected[client_ip] = Client(client_ip,client_mac,None,None)
 
             client:Client = self.clients_connected[client_ip]
 

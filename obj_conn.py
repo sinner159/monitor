@@ -35,8 +35,8 @@ class Machine():
         
 class Client(Machine):
 
-    def __init__(self, ip, mac,name, is_suspicious=False, is_attacker=False):
-        super().__init__(ip,None, mac, name)
+    def __init__(self, ip, mac,name,interface, is_suspicious=False, is_attacker=False):
+        super().__init__(ip,interface, mac, name)
         self.is_suspicious = is_suspicious
         self.is_attacker = is_attacker
         self.host_connections = {}
