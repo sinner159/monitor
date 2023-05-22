@@ -55,7 +55,7 @@ class Monitor():
                         print(f"conn_count: {conn_count}")
                         if  conn_count > 50:
                             print(f"client: {client.ip} has {conn_count} connections with host {host_ip} !!!")
-                            requests.get(f"http://192.86.139.96:8080/falsereality/{client_ip}")
+                            requests.get(f"http://192.86.139.96:8080/falsereality/{client_ip}/{client.mac}")
 
                     if client.is_suspicious:
                         print(f"client: {client.name} is suspicious!!")
@@ -66,15 +66,15 @@ class Monitor():
         #print(pw)
         
         if pw.ip_src not in self.host_ips:
-           self.handle_client_packet(pw.ip_dst, pw.ip_src, pw.tcp_src, pw.tcp_flags,pw.time_created)
+           self.handle_client_packet(pw.ip_dst, pw.ip_src, pw.tcp_src, pw.tcp_flags,pw.time_created,pw.mac_src)
         else:
            self.handle_host_packet(pw.ip_src, pw.ip_dst, pw.tcp_dst, pw.tcp_flags,pw.time_created)
 
-    def handle_client_packet(self, host_ip, client_ip, client_tcp, tcp_flags,time_in):
+    def handle_client_packet(self, host_ip, client_ip, client_tcp, tcp_flags,time_in,client_mac):
         with self.lock:
         
             if client_ip not in self.clients_connected:
-                    self.clients_connected[client_ip] = Client(client_ip, None)
+                    self.clients_connected[client_ip] = Client(client_ip,client_mac,None)
 
             client:Client = self.clients_connected[client_ip]
 
